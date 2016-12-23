@@ -31,27 +31,5 @@ An add-on package to MALLET, called GRMM, contains support for inference in gene
   * Weighted Topic Model
   * LDA with integrated phrase discovery
   * Word Embeddings (word2vec) using skip-gram with negative sampling
-* Classification
-  * AdaBoost
-  * Bagging
-  * Winnow
-  * C45 Decision Tree
-  * Ensemble Trainer
-  * Maximum Entropy Classifier (Multinomial Logistic Regression)
-  * Naive Bayes
-  * Rank Maximum Entropy Classifier
-  * Posterior Regularization Auxiliary Model
-* Clustering
-  * Greedy Agglomerative
-  * Hill Climbing
-  * K-Means
-  * K-Best
-* Sequence Prediction Models
-  * Conditional Random Fields
-  * Maximum Entropy Markov Models
-  * Hidden Markov Models
-  * Semi-Supervised Sequence Prediction Models
-* Linear Regression
-
 
 
