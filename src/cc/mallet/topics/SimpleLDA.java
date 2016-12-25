@@ -8,6 +8,8 @@
 package cc.mallet.topics;
 
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.*;
 import java.util.zip.*;
 
@@ -64,7 +66,7 @@ public class SimpleLDA implements Serializable {
 	protected int[][] typeTopicCounts; // indexed by <feature index, topic index>
 	protected int[] tokensPerTopic; // indexed by <topic index>
 
-	public int showTopicsInterval = 50;
+	public int showTopicsInterval = 10;
 	public int wordsPerTopic = 10;
 	
 	protected Randoms random;
@@ -182,11 +184,11 @@ public class SimpleLDA implements Serializable {
             long elapsedMillis = System.currentTimeMillis() - iterationStart;
 			logger.fine(iteration + "\t" + elapsedMillis + "ms\t");
 
-			// Occasionally print more information
-			if (showTopicsInterval != 0 && iteration % showTopicsInterval == 0) {
-				logger.info("<" + iteration + "> Log Likelihood: " + modelLogLikelihood() + "\n" +
-							topWords (wordsPerTopic));
-			}
+//			// Occasionally print more information
+//			if (showTopicsInterval != 0 && iteration % showTopicsInterval == 0) {
+//				logger.info("<" + iteration + "> Log Likelihood: " + modelLogLikelihood()
+//						+ "\n");// + topWords (wordsPerTopic));
+//			}
 
 		}
 	}
@@ -562,11 +564,27 @@ public class SimpleLDA implements Serializable {
 
 		InstanceList training = InstanceList.load (new File("instances"));
 
-		int numTopics = args.length > 1 ? Integer.parseInt(args[1]) : 200;
+		int numTopics = args.length > 1 ? Integer.parseInt(args[1]) : 200	;
 
-		SimpleLDA lda = new SimpleLDA (numTopics, 50.0, 0.01);
-		lda.addInstances(training);
-		lda.sample(100);
+		ExecutorService executor = Executors.newFixedThreadPool(8);
+
+		for(int i = 10; i < 100; i *= 2) {
+			for(double a = i / 200.0; a < i; a *= 2) {
+				int I = i;
+				double A = a;
+				executor.execute(new Thread(() -> {
+					SimpleLDA lda = new SimpleLDA(I, A, 0.01);
+					lda.addInstances(training);
+					try {
+						lda.sample(1000);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					System.out.println(lda.modelLogLikelihood() + " topicNum" + I + " a:" + A);
+				}));
+			}
+		}
+		executor.shutdown();
 	}
 	
 }

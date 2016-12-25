@@ -27,6 +27,6 @@ public class ArrayIndexComparator implements Comparator<Integer>
     public int compare(Integer index1, Integer index2)
     {
         // Autounbox from Integer to int to use as array indexes
-        return array[index2].compareTo(array[index1]);
+        return array[index1].compareTo(array[index2]);
     }
 }

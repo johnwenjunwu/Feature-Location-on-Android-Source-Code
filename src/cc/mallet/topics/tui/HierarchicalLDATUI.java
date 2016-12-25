@@ -10,7 +10,7 @@ import java.io.*;
 public class HierarchicalLDATUI {
 	
 	static CommandOption.String inputFile = new CommandOption.String
-		(HierarchicalLDATUI.class, "input", "FILENAME", true, null,
+		(HierarchicalLDATUI.class, "input", "FILENAME", true, "instances",
 		 "The filename from which to read the list of training instances.  Use - for stdin.  " +
 		 "The instances must be FeatureSequence or FeatureSequenceWithBigrams, not FeatureVector", null);
 	

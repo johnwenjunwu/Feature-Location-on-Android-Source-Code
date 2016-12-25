@@ -4,6 +4,7 @@ import java.util.Vector;
 
 public class ClassTestResultTopicModel {
     ClassTestResultTopicModel(String name, String packageName) {
+        System.out.println("class:" + name + " package:" + packageName);
         className = name;
         this.packageName = packageName;
         findClass = new Vector<>();
