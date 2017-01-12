@@ -32,7 +32,8 @@ public class MyTopicModel implements Runnable{
 
     public void generateInstances() {
         ArrayList<Pipe> pipeList = new ArrayList<Pipe>(Arrays.asList(
-                new CharSequenceLowercase(), new CharSequence2TokenSequence(Pattern.compile("\\p{L}[\\p{L}\\p{P}]+\\p{L}")),
+                new CharSequenceLowercase(), new StemPipe(),
+                new CharSequence2TokenSequence(Pattern.compile("\\p{L}[\\p{L}\\p{P}]+\\p{L}")),
                 new TokenSequenceRemoveStopwords(new File("stoplists/java.txt"), "UTF-8", false, false, false),
                 new TokenSequenceRemoveStopwords(new File("stoplists/en.txt"), "UTF-8", false, false, false),
                 new TokenSequence2FeatureSequence()));

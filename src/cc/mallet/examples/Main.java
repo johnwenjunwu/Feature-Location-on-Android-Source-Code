@@ -15,15 +15,31 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
 public class Main {
-    static String source = "k-9-43c38a047feedda4720af5bfbc188a33f8dfaced";
+    static String source = "show password";
     static String[] test = {
             "SSL file based session cache",
             "use client certificate authentication",
             "get Open Key chain",
     };
+    static void createDirectory() throws IOException {
+        Files.createDirectory(Paths.get(Main.source));
+        Files.createDirectory(Paths.get(Main.source + "/feature"));
+        Files.createDirectory(Paths.get(Main.source + "/instance"));
+        Files.createDirectory(Paths.get(Main.source + "/model"));
+        Files.createDirectory(Paths.get(Main.source + "/model/gson"));
+        Files.createDirectory(Paths.get(Main.source + "/model/model"));
+        Files.createDirectory(Paths.get(Main.source + "/test"));
+        Files.createDirectory(Paths.get(Main.source + "/test/cos"));
+        Files.createDirectory(Paths.get(Main.source + "/test/kl"));
+    }
     public static void main(String[] args) throws Exception {
+       // System.out.println(new Stemmer().stem("yes"));
+//        createDirectory();
+//        JsonReadWrite.main(args);
+
         //int[] b = (int[]) new ObjectInputStream(new FileInputStream("kl/" + name)).readObject();
         //GenerateModel();
+        runTest();
 //        analyzeModel();
 //        sortModel();
 
@@ -38,7 +54,8 @@ public class Main {
 ////            List<String> feature = Files.readAllLines(Paths.get("feature/wordsMoreThan" + name.split("_")[2]));
 ////            for (int j = 10; j < 11; ++j) {
 ////                System.out.println(feature.get(j));
-        new Test(source, "80_1600_2", test[0]).run();
+//        new Test(source, "80_2000_4", source).run();
+
         //            //}
 //            //break;
 //        }
@@ -115,12 +132,29 @@ public class Main {
 
         ExecutorService executor = Executors.newFixedThreadPool(8);
 
-        tag: for (int topic = 40; topic <= 160; topic *= 2) {
-            for (int train = 100; train <= 2000; train *= 2) {
-                for (int mini = 1; mini <= 20; mini *= 2) {
+        tag: for (int topic = 40; topic <= 80; topic *= 2) {
+            for (int train = 1000; train <= 2000; train *= 2) {
+                for (int mini = 2; mini <= 2; mini *= 2) {
                     int a = topic, b = train, c = mini;
                     executor.execute(new MyTopicModel(source, a, b, c));
                    // break tag;
+                }
+            }
+        }
+
+        executor.shutdown();
+        executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+    }
+    private static void runTest() throws InterruptedException, IOException {
+
+        ExecutorService executor = Executors.newFixedThreadPool(8);
+
+        tag: for (int topic = 40; topic <= 80; topic *= 2) {
+            for (int train = 1000; train <= 2000; train *= 2) {
+                for (int mini = 2; mini <= 2; mini *= 2) {
+                    int a = topic, b = train, c = mini;
+                    executor.execute(new Test(source, a + "_" + b + "_" + c, "view password clicking on checkbox Show password"));
+                    // break tag;
                 }
             }
         }

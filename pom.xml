@@ -60,7 +60,7 @@
     <dependency>
       <groupId>com.github.javaparser</groupId>
       <artifactId>javaparser-core</artifactId>
-      <version>3.0.0-RC.2</version>
+      <version>3.0.0-RC.4</version>
     </dependency>
     <dependency>
       <groupId>de.erichseifert.gral</groupId>
@@ -77,7 +77,11 @@
       <artifactId>commons-lang3</artifactId>
       <version>3.5</version>
     </dependency>
-
+    <dependency>
+      <groupId>org.atteo</groupId>
+      <artifactId>evo-inflector</artifactId>
+      <version>1.2.2</version>
+    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>

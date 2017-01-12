@@ -4,6 +4,7 @@ import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.VariableDeclarator;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -89,6 +90,7 @@ class MDirectory {
                     //System.out.print(mMethod.methodName + " ");
                     stringBuilder.append(' ');
                     stringBuilder.append(mMethod.methodName.replaceAll(divide, " "));
+                    mMethod.ids.forEach(id -> stringBuilder.append(' ' + id));
                 }
                 //System.out.println();
                 stringBuilder.append('\n');
@@ -110,6 +112,7 @@ class MDirectory {
             }
         return stringBuilder;
     }
+
     StringBuilder getMethodFeature() {
         StringBuilder stringBuilder = new StringBuilder();
         for (MDirectory directory : subDirectories)
@@ -137,7 +140,7 @@ class MFile {
             fileName = file.getName();
             classes = new Vector<>();
             CompilationUnit compilationUnit = JavaParser.parse(file);
-            packageName = compilationUnit.getPackage().get().getPackageName();
+            packageName = compilationUnit.getPackageDeclaration().get().getName().toString();
             compilationUnit.getNodesByType(ClassOrInterfaceDeclaration.class).forEach(c -> classes.add(new MClass(c)));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -161,12 +164,25 @@ class MClass {
 class MMethod {
     String methodName;
     Vector<String> parameters;
+    Vector<String> ids;
 
     MMethod(MethodDeclaration methodDeclaration) {
         methodName = methodDeclaration.getName().getIdentifier();
         parameters = new Vector<>();
+        ids = new Vector<>();
         methodDeclaration.getParameters().
                 forEach(p -> parameters.add(p.getName().getIdentifier()));
+        if (methodDeclaration.getBody().isPresent())
+            methodDeclaration.getBody().get().getNodesByType(VariableDeclarator.class).forEach(
+                    v -> {
+                        if (v.getInitializer().isPresent() && v.getInitializer().toString().contains("R.id.")) {
+                            String id = v.getInitializer().toString().split("R\\.id\\.", 2)[1].split("\\)", 2)[0].replace("_", " ");
+                            ids.add(id);
+                            //System.out.println(id);
+                        }
+                    }
+            );
+//        methodDeclaration.get
 //        System.out.println((methodDeclaration.getJavaDoc()));
 //        if(methodDeclaration.getComment() != null) {
 //            System.out.println("methodName:" + methodName);
@@ -194,8 +210,10 @@ public class JsonReadWrite {
         }
     }
 
-    private static void GenerateOriginClassFeature() {
-        MDirectory dir = new MDirectory(new File( "/Users/wuwenjun/Documents/study/features/Implement SSL file-based session caching/k-9-43c38a047feedda4720af5bfbc188a33f8dfaced/src/com/fsck/k9"));
+    private static void GenerateOriginClassFeature() throws IOException {
+
+        MDirectory dir = new MDirectory(new File("/Users/wuwenjun/Documents/study/features/f1/k-9-a495627d72990f0ce6cb795d5e2d9dae3df523fe/src/com/fsck/k9"));
+        dir.getClassFeature();
         try (FileWriter writer = new FileWriter(Main.source + "/feature/origin")) {
             writer.write(dir.getClassFeature().toString());
             //gson.toJson(dir, writer);
