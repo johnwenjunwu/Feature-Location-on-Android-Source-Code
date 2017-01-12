@@ -21,6 +21,7 @@ public class Main {
             "use client certificate authentication",
             "get Open Key chain",
     };
+
     static void createDirectory() throws IOException {
         Files.createDirectory(Paths.get(Main.source));
         Files.createDirectory(Paths.get(Main.source + "/feature"));
@@ -32,8 +33,9 @@ public class Main {
         Files.createDirectory(Paths.get(Main.source + "/test/cos"));
         Files.createDirectory(Paths.get(Main.source + "/test/kl"));
     }
+
     public static void main(String[] args) throws Exception {
-       // System.out.println(new Stemmer().stem("yes"));
+        // System.out.println(new Stemmer().stem("yes"));
 //        createDirectory();
 //        JsonReadWrite.main(args);
 
@@ -118,26 +120,26 @@ public class Main {
     public static void deleteGson() throws IOException {
         Arrays.stream(new File(source + "/model/gson").listFiles()).forEach(f -> f.delete());
         Arrays.stream(new File(source + "/model").listFiles()).forEach(f -> {
-            if(f.isFile())
+            if (f.isFile())
                 f.delete();
         });
-        Arrays.stream(new File(source + "/test/cos").listFiles()).forEach(f -> f.delete());
-
 
 //        Files.deleteIfExists(Paths.get(source + "/model/gson"));
 //        Files.createDirectory(Paths.get(source + "/model/gson"));
     }
+
     private static void GenerateModel() throws InterruptedException, IOException {
         deleteGson();
 
         ExecutorService executor = Executors.newFixedThreadPool(8);
 
-        tag: for (int topic = 40; topic <= 80; topic *= 2) {
-            for (int train = 1000; train <= 2000; train *= 2) {
-                for (int mini = 2; mini <= 2; mini *= 2) {
+        tag:
+        for (int topic = 20; topic <= 160; topic *= 1.5) {
+            for (int train = 100; train <= 2000; train *= 2) {
+                for (int mini = 1; mini <= 20; mini *= 2) {
                     int a = topic, b = train, c = mini;
                     executor.execute(new MyTopicModel(source, a, b, c));
-                   // break tag;
+                    // break tag;
                 }
             }
         }
@@ -145,16 +147,22 @@ public class Main {
         executor.shutdown();
         executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
     }
+
     private static void runTest() throws InterruptedException, IOException {
+        Arrays.stream(new File(source + "/test/cos").listFiles()).forEach(File::delete);
+        new File(source + "/test/result").delete();
 
         ExecutorService executor = Executors.newFixedThreadPool(8);
 
-        tag: for (int topic = 40; topic <= 80; topic *= 2) {
-            for (int train = 1000; train <= 2000; train *= 2) {
-                for (int mini = 2; mini <= 2; mini *= 2) {
-                    int a = topic, b = train, c = mini;
-                    executor.execute(new Test(source, a + "_" + b + "_" + c, "view password clicking on checkbox Show password"));
-                    // break tag;
+        tag:
+        for (int topic = 45; topic <= 160; topic *= 1.5) {
+            for (int train = 800; train <= 2000; train *= 2) {
+                for (int mini = 8; mini <= 20; mini *= 2) {
+                    for (int iter = 100; iter <= 200; iter *= 2) {
+                        int a = topic, b = train, c = mini, i = iter;
+                        executor.execute(new Test(source, a + "_" + b + "_" + c,
+                                "view password by clicking on checkbox Show password", i));
+                    }
                 }
             }
         }

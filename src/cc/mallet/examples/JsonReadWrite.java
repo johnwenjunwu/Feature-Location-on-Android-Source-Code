@@ -64,23 +64,8 @@ class MDirectory {
 //                else
 //                    hasMethodClass++;
 
-                int word = 0;
-                for (MMethod mMethod : mClass.methods)
-                    word += mMethod.methodName.split(divide).length;
 
-//                Integer in = wordSum.get(word);
-//                if(in == null)
-//                    wordSum.put(word, 1);
-//                else
-//                    wordSum.put(word, in + 1);
-//                if(word <= mini) {
-//                    noneMethodClass++;
-//                    continue;
-//                }
-//                else
-//                    hasMethodClass++;
-
-                stringBuilder.append(word + " " + file.packageName + "_" + file.fileName + " " + mClass.className + " ");
+                stringBuilder.append(file.packageName + "_" + file.fileName + " " + mClass.className + " ");
                 stringBuilder.append(file.packageName.substring("com.fsck.k9".length()).replace(".", " "));
                 stringBuilder.append(" " + file.fileName.split("\\.", 2)[0]
                         .replaceAll(divide, " "));
@@ -98,35 +83,35 @@ class MDirectory {
         return stringBuilder;
     }
 
-    StringBuilder getPackageFeatureDepth1() {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (MDirectory directory : subDirectories)
-            stringBuilder.append(directory.getPackageFeatureDepth1());
-        for (MFile file : files)
-            for (MClass mClass : file.classes) {
-                stringBuilder.append(file.packageName + "_" + file.fileName + " " + mClass.className + " ");
-                for (MMethod mMethod : mClass.methods) {
-                    stringBuilder.append(String.join(" ", mMethod.methodName.split("(?<=\\p{Ll})(?=\\p{Lu})|(?=\\p{Lu}\\p{Ll})")) + " ");
-                }
-                stringBuilder.append('\n');
-            }
-        return stringBuilder;
-    }
-
-    StringBuilder getMethodFeature() {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (MDirectory directory : subDirectories)
-            stringBuilder.append(directory.getMethodFeature());
-        for (MFile file : files)
-            for (MClass mClass : file.classes) {
-                stringBuilder.append(file.packageName + "_" + file.fileName + " " + mClass.className + " ");
-                for (MMethod mMethod : mClass.methods) {
-                    stringBuilder.append(String.join(" ", mMethod.methodName.split("(?<=\\p{Ll})(?=\\p{Lu})|(?=\\p{Lu}\\p{Ll})")) + " ");
-                }
-                stringBuilder.append('\n');
-            }
-        return stringBuilder;
-    }
+//    StringBuilder getPackageFeatureDepth1() {
+//        StringBuilder stringBuilder = new StringBuilder();
+//        for (MDirectory directory : subDirectories)
+//            stringBuilder.append(directory.getPackageFeatureDepth1());
+//        for (MFile file : files)
+//            for (MClass mClass : file.classes) {
+//                stringBuilder.append(file.packageName + "_" + file.fileName + " " + mClass.className + " ");
+//                for (MMethod mMethod : mClass.methods) {
+//                    stringBuilder.append(String.join(" ", mMethod.methodName.split("(?<=\\p{Ll})(?=\\p{Lu})|(?=\\p{Lu}\\p{Ll})")) + " ");
+//                }
+//                stringBuilder.append('\n');
+//            }
+//        return stringBuilder;
+//    }
+//
+//    StringBuilder getMethodFeature() {
+//        StringBuilder stringBuilder = new StringBuilder();
+//        for (MDirectory directory : subDirectories)
+//            stringBuilder.append(directory.getMethodFeature());
+//        for (MFile file : files)
+//            for (MClass mClass : file.classes) {
+//                stringBuilder.append(file.packageName + "_" + file.fileName + " " + mClass.className + " ");
+//                for (MMethod mMethod : mClass.methods) {
+//                    stringBuilder.append(String.join(" ", mMethod.methodName.split("(?<=\\p{Ll})(?=\\p{Lu})|(?=\\p{Lu}\\p{Ll})")) + " ");
+//                }
+//                stringBuilder.append('\n');
+//            }
+//        return stringBuilder;
+//    }
 }
 
 class MFile {
@@ -202,9 +187,9 @@ public class JsonReadWrite {
         for(int mini = 0; mini <= 100; ++ mini) {
             StringBuilder builder = new StringBuilder();
             for(String line: Files.readAllLines(Paths.get(Main.source + "/feature/origin"))) {
-                String[] parts = line.split(" ", 2);
-                if (Integer.parseInt(parts[0]) >= mini)
-                    builder.append(parts[1] + '\n');
+                int length = line.split(" +").length - 2;
+                if (length > mini)
+                    builder.append(line).append('\n');
             }
             Files.write(Paths.get(Main.source + "/feature/wordsMoreThan" + mini), builder.toString().getBytes());
         }

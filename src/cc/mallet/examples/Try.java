@@ -18,11 +18,8 @@ import org.w3c.dom.Element;
 public class Try {
     public static void main(String[] args){
 
-        try {
-            System.out.println(English.plural("word", 1));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        System.out.println("jkd  j d ".split("\\W+").length);
+
     }
 }
 

@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.Vector;
@@ -19,9 +20,11 @@ public class Test implements Runnable{
     Instance testInstance;
     InstanceList instances;
     String name, source;
+    int iter;
     List<Instance> features;
 
-    Test(String src, String name, String test) {
+    Test(String src, String name, String test, int iter) {
+        this.iter = iter;
         source = src;
         this.name = name;
         try {
@@ -59,17 +62,24 @@ public class Test implements Runnable{
 
         //System.out.println(Integer.parseInt(name.split("_")[1]));
         TopicInferencer inferencer = model.getInferencer();
-        double[] request = inferencer.getSampledDistribution(testInstance,
-                Integer.parseInt(name.split("_")[1]), 1, 5);
+        double[] request = inferencer.getSampledDistribution(testInstance, iter
+                , 1, 5);
 
 
         StringBuilder question = new StringBuilder();
         for (int t = 0; t < request.length; ++t) {
             if (request[t] > 0.01)
-                question.append(t + " " + new DecimalFormat("##.##").format(request[t]) + "\n");
+                question.append(t + 1 + " " + new DecimalFormat("##.##").format(request[t]) + "\n");
         }
-        System.out.println("\n\n" + name + '\n' + question);
+
+
         try {
+            String result = "\n\n" + name + '\n' + testInstance.getData().toString() + '\n' + question;
+            if (new File(source + "/test/result").exists())
+                Files.write(Paths.get(source + "/test/result"), result.getBytes(), StandardOpenOption.APPEND);
+            else
+                Files.write(Paths.get(source + "/test/result"), result.getBytes());
+
             for (int i = 0; i < model.getData().size(); ++i) {
                 cosList.add(new Item(i,
                         Result.cosine(model.getTopicProbabilities(i), request), model.getTopicProbabilities(i)));
@@ -78,11 +88,12 @@ public class Test implements Runnable{
             cosList.sort((a,b)->a.sim>b.sim?-1:1);
             for (Item item: cosList)
                 item.No = cosList.indexOf(item);
+
             klList.sort((a,b)->a.sim<b.sim?-1:1);
 
             //System.out.println(cosList.get(0).pos);
-            Files.write(Paths.get(source + "/test/cos/" + name + ".json"), new Gson().toJson(cosList).getBytes());
-            Files.write(Paths.get(source + "/test/kl/" + name + ".json"), new Gson().toJson(klList).getBytes());
+            Files.write(Paths.get(source + "/test/cos/" + name + "_" + String.format("%04d", iter) + ".json"), new Gson().toJson(cosList).getBytes());
+            //Files.write(Paths.get(source + "/test/kl/" + name + ".json"), new Gson().toJson(klList).getBytes());
 
         } catch (IOException e) {
             e.printStackTrace();
