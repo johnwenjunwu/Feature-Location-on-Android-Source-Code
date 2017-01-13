@@ -1,21 +1,18 @@
 package cc.mallet.examples;
 
-import cc.mallet.topics.ParallelTopicModel;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
 import java.io.*;
-import java.nio.charset.Charset;
+import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.IntStream;
+
 
 public class Main {
-    static String source = "show password";
+    static String source = "Change message body font size with slider";
     static String[] test = {
             "SSL file based session cache",
             "use client certificate authentication",
@@ -33,10 +30,17 @@ public class Main {
         Files.createDirectory(Paths.get(Main.source + "/test/cos"));
         Files.createDirectory(Paths.get(Main.source + "/test/kl"));
     }
+    static void deleteAllFiles(String p) throws IOException {
+        Files.walk(Paths.get(p), FileVisitOption.FOLLOW_LINKS)
+                .map(Path::toFile)
+                .filter(File::isFile)
+                .peek(System.out::println)
+                .forEach(File::delete);
+    }
 
     public static void main(String[] args) throws Exception {
         // System.out.println(new Stemmer().stem("yes"));
-//        createDirectory();
+        //createDirectory();
 //        JsonReadWrite.main(args);
 
         //int[] b = (int[]) new ObjectInputStream(new FileInputStream("kl/" + name)).readObject();
@@ -117,29 +121,17 @@ public class Main {
 //        executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
 //    }
 
-    public static void deleteGson() throws IOException {
-        Arrays.stream(new File(source + "/model/gson").listFiles()).forEach(f -> f.delete());
-        Arrays.stream(new File(source + "/model").listFiles()).forEach(f -> {
-            if (f.isFile())
-                f.delete();
-        });
-
-//        Files.deleteIfExists(Paths.get(source + "/model/gson"));
-//        Files.createDirectory(Paths.get(source + "/model/gson"));
-    }
-
     private static void GenerateModel() throws InterruptedException, IOException {
-        deleteGson();
+        deleteAllFiles(source + "/model");
 
         ExecutorService executor = Executors.newFixedThreadPool(8);
 
         tag:
-        for (int topic = 20; topic <= 160; topic *= 1.5) {
-            for (int train = 100; train <= 2000; train *= 2) {
-                for (int mini = 1; mini <= 20; mini *= 2) {
+        for (int topic = 45; topic <= 160; topic *= 1.5) {
+            for (int train = 800; train <= 2000; train *= 2) {
+                for (int mini = 8; mini <= 40; mini *= 2) {
                     int a = topic, b = train, c = mini;
                     executor.execute(new MyTopicModel(source, a, b, c));
-                    // break tag;
                 }
             }
         }
@@ -149,19 +141,17 @@ public class Main {
     }
 
     private static void runTest() throws InterruptedException, IOException {
-        Arrays.stream(new File(source + "/test/cos").listFiles()).forEach(File::delete);
-        new File(source + "/test/result").delete();
-
+        deleteAllFiles(source + "/test");
         ExecutorService executor = Executors.newFixedThreadPool(8);
 
         tag:
         for (int topic = 45; topic <= 160; topic *= 1.5) {
             for (int train = 800; train <= 2000; train *= 2) {
-                for (int mini = 8; mini <= 20; mini *= 2) {
-                    for (int iter = 100; iter <= 200; iter *= 2) {
+                for (int mini = 8; mini <= 40; mini *= 2) {
+                    for (int iter = 200; iter <= 200; iter *= 2) {
                         int a = topic, b = train, c = mini, i = iter;
                         executor.execute(new Test(source, a + "_" + b + "_" + c,
-                                "view password by clicking on checkbox Show password", i));
+                                source, i));
                     }
                 }
             }

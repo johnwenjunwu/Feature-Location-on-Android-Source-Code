@@ -2,6 +2,7 @@ package cc.mallet.examples;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
@@ -21,16 +22,12 @@ class MDirectory {
     String directoryName;
     Vector<MFile> files;
     Vector<MDirectory> subDirectories;
-    static int noneMethodClass;
-    static int hasMethodClass;
-    static Map<Integer, Integer> wordSum;
     static String divide = "(?<=\\p{Ll})(?=\\p{Lu})|(?=\\p{Lu}\\p{Ll})";
 
     MDirectory(File dir) {
         directoryName = dir.getName();
         subDirectories = new Vector<>();
         files = new Vector<>();
-        wordSum = new TreeMap<>();
         for (File file : dir.listFiles()) {
             if (file.isDirectory())
                 subDirectories.add(new MDirectory(file));
@@ -39,40 +36,20 @@ class MDirectory {
         }
     }
 
-    StringBuilder jkh() {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (MDirectory directory : subDirectories)
-            stringBuilder.append(directory.jkh());
-        for (MFile file : files)
-            for (MClass mClass : file.classes)
-                for (MMethod mMethod : mClass.methods) {
-                    stringBuilder.append(file.packageName + "." + mClass.className + "." + mMethod.methodName + '\n');
-                }
-        return stringBuilder;
-    }
-
     StringBuilder getClassFeature() {
         StringBuilder stringBuilder = new StringBuilder();
         for (MDirectory directory : subDirectories)
             stringBuilder.append(directory.getClassFeature());
         for (MFile file : files)
             for (MClass mClass : file.classes) {
-//                if (mClass.methods.size() == 1) {
-//                    noneMethodClass++;
-//                    System.out.println(mClass.methods.get(0).methodName.split("(?=\\p{Lu})").length);
-//                }
-//                else
-//                    hasMethodClass++;
-
-
                 stringBuilder.append(file.packageName + "_" + file.fileName + " " + mClass.className + " ");
                 stringBuilder.append(file.packageName.substring("com.fsck.k9".length()).replace(".", " "));
                 stringBuilder.append(" " + file.fileName.split("\\.", 2)[0]
                         .replaceAll(divide, " "));
-//                stringBuilder.append(String.join(" ", mMethod.methodName.split("(?<=\\p{Ll})(?=\\p{Lu})|(?=\\p{Lu}\\p{Ll})")) + " ");
+
+                mClass.fields.forEach(f -> stringBuilder.append(" " + f));
 
                 for (MMethod mMethod : mClass.methods) {
-                    //System.out.print(mMethod.methodName + " ");
                     stringBuilder.append(' ');
                     stringBuilder.append(mMethod.methodName.replaceAll(divide, " "));
                     mMethod.ids.forEach(id -> stringBuilder.append(' ' + id));
@@ -82,36 +59,6 @@ class MDirectory {
             }
         return stringBuilder;
     }
-
-//    StringBuilder getPackageFeatureDepth1() {
-//        StringBuilder stringBuilder = new StringBuilder();
-//        for (MDirectory directory : subDirectories)
-//            stringBuilder.append(directory.getPackageFeatureDepth1());
-//        for (MFile file : files)
-//            for (MClass mClass : file.classes) {
-//                stringBuilder.append(file.packageName + "_" + file.fileName + " " + mClass.className + " ");
-//                for (MMethod mMethod : mClass.methods) {
-//                    stringBuilder.append(String.join(" ", mMethod.methodName.split("(?<=\\p{Ll})(?=\\p{Lu})|(?=\\p{Lu}\\p{Ll})")) + " ");
-//                }
-//                stringBuilder.append('\n');
-//            }
-//        return stringBuilder;
-//    }
-//
-//    StringBuilder getMethodFeature() {
-//        StringBuilder stringBuilder = new StringBuilder();
-//        for (MDirectory directory : subDirectories)
-//            stringBuilder.append(directory.getMethodFeature());
-//        for (MFile file : files)
-//            for (MClass mClass : file.classes) {
-//                stringBuilder.append(file.packageName + "_" + file.fileName + " " + mClass.className + " ");
-//                for (MMethod mMethod : mClass.methods) {
-//                    stringBuilder.append(String.join(" ", mMethod.methodName.split("(?<=\\p{Ll})(?=\\p{Lu})|(?=\\p{Lu}\\p{Ll})")) + " ");
-//                }
-//                stringBuilder.append('\n');
-//            }
-//        return stringBuilder;
-//    }
 }
 
 class MFile {
@@ -136,9 +83,25 @@ class MFile {
 class MClass {
     String className;
     Vector<MMethod> methods;
+    Vector<String> fields;
 
     MClass(ClassOrInterfaceDeclaration classOrInterfaceDeclaration) {
+        fields = new Vector<>();
         className = classOrInterfaceDeclaration.getName().getIdentifier();
+        classOrInterfaceDeclaration.getFields().forEach(f -> {
+            boolean feature = true;
+            for (Modifier m : f.getModifiers()) {
+                if (m.toString().equals("STATIC") || m.toString().equals("FINAL")) {
+                    feature = false;
+                    break;
+                }
+            }
+            if (feature) {
+                f.getVariables().forEach(v -> {
+                    fields.add(v.getName().getIdentifier());
+                });
+            }
+        });
         methods = new Vector<>();
         classOrInterfaceDeclaration.getMethods().forEach(m -> {
             methods.add(new MMethod(m));
@@ -167,13 +130,6 @@ class MMethod {
                         }
                     }
             );
-//        methodDeclaration.get
-//        System.out.println((methodDeclaration.getJavaDoc()));
-//        if(methodDeclaration.getComment() != null) {
-//            System.out.println("methodName:" + methodName);
-//            System.out.println("comment:" + (methodDeclaration.getComment()));
-//        }
-
 
     }
 }
@@ -197,8 +153,8 @@ public class JsonReadWrite {
 
     private static void GenerateOriginClassFeature() throws IOException {
 
-        MDirectory dir = new MDirectory(new File("/Users/wuwenjun/Documents/study/features/f1/k-9-a495627d72990f0ce6cb795d5e2d9dae3df523fe/src/com/fsck/k9"));
-        dir.getClassFeature();
+        MDirectory dir = new MDirectory(new File("/Users/wuwenjun/Documents/study/features/f5/k-9-cf228583bc393013941def0936d86fd636ff9257/src/com/fsck/k9"));
+//        dir.getClassFeature();
         try (FileWriter writer = new FileWriter(Main.source + "/feature/origin")) {
             writer.write(dir.getClassFeature().toString());
             //gson.toJson(dir, writer);

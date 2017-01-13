@@ -9,7 +9,7 @@ import java.util.List;
 public class Arrf {
     public static void main(String[] args) throws IOException {
         StringBuilder builder = new StringBuilder();
-        String[] contents = new String(Files.readAllBytes(Paths.get("/Users/wuwenjun/Downloads/component_related-to_concern.arff")))
+        String[] contents = new String(Files.readAllBytes(Paths.get("/Users/wuwenjun/Documents/study/features/f5/component_related-to_concern.arff")))
                 .split("@DATA\n",2)[1].split("\n");
         for (String line: contents) {
             String[] con = line.split("\"");
