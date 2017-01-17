@@ -34,7 +34,7 @@ public class MyTopicModel implements Runnable{
         ArrayList<Pipe> pipeList = new ArrayList<Pipe>(Arrays.asList(
                 new CharSequenceLowercase(), new StemPipe(),
                 new CharSequence2TokenSequence(Pattern.compile("\\p{L}[\\p{L}\\p{P}]+\\p{L}")),
-                new TokenSequenceRemoveStopwords(new File("stoplists/java.txt"), "UTF-8", false, false, false),
+                new TokenSequenceRemoveStopwords(new File("stoplists/activity.txt"), "UTF-8", false, false, false),
                 new TokenSequenceRemoveStopwords(new File("stoplists/en.txt"), "UTF-8", false, false, false),
                 new TokenSequence2FeatureSequence()));
 
@@ -43,7 +43,7 @@ public class MyTopicModel implements Runnable{
 
         Reader fileReader = null;
         try {
-            fileReader = new InputStreamReader(new FileInputStream(new File(source + "/feature/wordsMoreThan" + mini)), "UTF-8");
+            fileReader = new InputStreamReader(new FileInputStream(new File(source + "/feature/activity")), "UTF-8");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         } catch (FileNotFoundException e) {
@@ -62,6 +62,7 @@ public class MyTopicModel implements Runnable{
         numIterations = train;
         this.mini = mini;
     }
+
 
 
     public void generateModel() {

@@ -92,7 +92,7 @@ public class Test implements Runnable{
             klList.sort((a,b)->a.sim<b.sim?-1:1);
 
             //System.out.println(cosList.get(0).pos);
-            Files.write(Paths.get(source + "/test/cos/" + name + "_" + String.format("%04d", iter) + ".json"), new Gson().toJson(cosList).getBytes());
+            Files.write(Paths.get(source + "/test/cos/" + name + "_" + iter + ".json"), new Gson().toJson(cosList).getBytes());
             //Files.write(Paths.get(source + "/test/kl/" + name + ".json"), new Gson().toJson(klList).getBytes());
 
         } catch (IOException e) {
@@ -104,7 +104,7 @@ public class Test implements Runnable{
         String target, name;
         int No;
         String data;
-        int pos;
+        //int pos;
         double sim;
         Vector<String> topics;
         Item(int i, double sim, double[] topic) {
@@ -113,7 +113,7 @@ public class Test implements Runnable{
                 if (topic[t] > 0.01)
                     topics.add(t + " " + new DecimalFormat("##.##").format(topic[t]));
             }
-            pos = i;
+            //pos = i;
             target = features.get(i).getTarget().toString();
             name = features.get(i).getName().toString();
             data = features.get(i).getData().toString().replace("\n", "   ");

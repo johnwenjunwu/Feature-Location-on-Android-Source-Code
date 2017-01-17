@@ -7,15 +7,16 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Arrf {
-    public static void main(String[] args) throws IOException {
+    public Arrf(String source) throws IOException {
         StringBuilder builder = new StringBuilder();
-        String[] contents = new String(Files.readAllBytes(Paths.get("/Users/wuwenjun/Documents/study/features/f5/component_related-to_concern.arff")))
+        String[] contents = new String(Files.readAllBytes(Paths.get("/Users/wuwenjun/Documents/study/features/f7/component_related-to_concern.arff")))
                 .split("@DATA\n",2)[1].split("\n");
         for (String line: contents) {
             String[] con = line.split("\"");
-            if (con.length > 3)
+            if (con.length > 3 && con[1].contains("com.fsck.k9") && con[2].equals(",method,")) {
                 builder.append(con[1]).append('\n');
+            }
         }
-        Files.write(Paths.get(Main.source + "/test/flat"), builder.toString().getBytes());
+        Files.write(Paths.get(source + "/test/flat.txt"), builder.toString().getBytes());
     }
 }

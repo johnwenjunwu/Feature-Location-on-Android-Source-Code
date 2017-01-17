@@ -11,16 +11,24 @@ import java.nio.file.Paths;
 import java.util.Vector;
 
 public class ResultRanking {
-    public static void main(String[] args) throws IOException {
-        Files.list(Paths.get(Main.source + "/test/cos")).sorted(new AlphanumComparator())
+    ResultRanking(String source) throws IOException {
+        Files.list(Paths.get(source + "/test/cos")).sorted(new AlphanumComparator())
                 .forEach(p -> {
-                    Vector<Test.Item> tests = null;
+                    if (p.getFileName().toString().contains(""))
                     try {
-                        ((Vector<Test.Item>)new Gson().fromJson(new String(Files.readAllBytes(p)),
-                                new TypeToken<Vector<Test.Item>>(){}.getType()))
-                                .stream()
-                                .filter(item -> item.target.endsWith("SliderPreference.java"))
-                                .forEach(item -> System.out.println(p.getFileName() + " " + item.No));
+//                        String[] s = p.getFileName().toString().split("\\.json", 2)[0].split("_");
+                        int lines = Files.readAllLines(Paths.get(source + "/feature/activity")).size();
+                        System.out.println(p.getFileName() + " " + lines);
+
+                        Vector<Test.Item> v = new Gson().fromJson(new String(Files.readAllBytes(p)),
+                                new TypeToken<Vector<Test.Item>>(){}.getType());
+//                        findFirst("AccountSetupBasics.java", v);
+                        //findFirst("calculateAvailableColors", v);
+                        findFirst("FontSizes.java", v);
+                        findFirst("FontSizeSettings.java", v);
+                        findFirst("SliderPreference.java", v);
+                        findFirst("MessageWebView.java", v);
+                        System.out.println();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -42,4 +50,13 @@ public class ResultRanking {
 //            }
 //        }
     }
+
+    public void findFirst(String s, Vector<Test.Item> v) {
+        for (Test.Item item: v)
+            if (item.target.contains(s) || item.name.contains(s)) {
+                System.out.println(item.No);
+                break;
+            }
+    }
+
 }
