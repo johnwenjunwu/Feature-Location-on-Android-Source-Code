@@ -24,10 +24,10 @@ public class ResultRanking {
                                 new TypeToken<Vector<Test.Item>>(){}.getType());
 //                        findFirst("AccountSetupBasics.java", v);
                         //findFirst("calculateAvailableColors", v);
-                        findFirst("FontSizes.java", v);
+//                        findFirst("FontSizes.java", v);
                         findFirst("FontSizeSettings.java", v);
-                        findFirst("SliderPreference.java", v);
-                        findFirst("MessageWebView.java", v);
+//                        findFirst("SliderPreference.java", v);
+//                        findFirst("MessageWebView.java", v);
                         System.out.println();
                     } catch (IOException e) {
                         e.printStackTrace();

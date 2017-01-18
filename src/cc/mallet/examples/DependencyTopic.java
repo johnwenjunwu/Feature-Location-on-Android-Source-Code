@@ -1,25 +1,21 @@
 package cc.mallet.examples;
 
-import cc.mallet.types.*;
 import cc.mallet.pipe.*;
-import cc.mallet.pipe.iterator.*;
-import cc.mallet.topics.*;
-import cc.mallet.util.Maths;
-import de.erichseifert.gral.data.DataTable;
+import cc.mallet.pipe.iterator.CsvIterator;
+import cc.mallet.topics.ParallelTopicModel;
+import cc.mallet.types.IDSorter;
+import cc.mallet.types.InstanceList;
 
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
-import java.util.Vector;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.*;
-import java.io.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.TreeSet;
+import java.util.regex.Pattern;
 
-import static java.util.Arrays.sort;
-
-public class MyTopicModel implements Runnable{
+public class DependencyTopic implements Runnable{
 
     int numIterations;
     int numTopics;
@@ -32,10 +28,11 @@ public class MyTopicModel implements Runnable{
 
     public void generateInstances() {
         ArrayList<Pipe> pipeList = new ArrayList<Pipe>(Arrays.asList(
-                new CharSequenceLowercase(), new StemPipe(),
+//                new CharSequenceLowercase(),
+//                new StemPipe(),
                 new CharSequence2TokenSequence(Pattern.compile("\\S+")),
-                new TokenSequenceRemoveStopwords(new File("stoplists/activity.txt"), "UTF-8", false, false, false),
-                new TokenSequenceRemoveStopwords(new File("stoplists/en.txt"), "UTF-8", false, false, false),
+//                new TokenSequenceRemoveStopwords(new File("stoplists/activity.txt"), "UTF-8", false, false, false),
+//                new TokenSequenceRemoveStopwords(new File("stoplists/en.txt"), "UTF-8", false, false, false),
                 new TokenSequence2FeatureSequence()));
 
         // Pipes: lowercase, tokenize, remove stopwords, map to features
@@ -43,10 +40,8 @@ public class MyTopicModel implements Runnable{
 
         Reader fileReader = null;
         try {
-            fileReader = new InputStreamReader(new FileInputStream(new File(source + "/feature/activity")), "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (FileNotFoundException e) {
+            fileReader = new InputStreamReader(new FileInputStream(new File(source + "/feature/dependency")), "UTF-8");
+        } catch (UnsupportedEncodingException | FileNotFoundException e) {
             e.printStackTrace();
         }
         instances.addThruPipe(new CsvIterator(fileReader, Pattern.compile("^(\\S*)[\\s,]*(\\S*)[\\s,]*(.*)$"),
@@ -55,7 +50,7 @@ public class MyTopicModel implements Runnable{
         //sim = new Integer[instances.size()][];
     }
 
-    MyTopicModel(String src, int topics, int train, int mini) {
+    DependencyTopic(String src, int topics, int train, int mini) {
         source = src;
         name = topics + "_" + train + "_" + mini;
         numTopics = topics;

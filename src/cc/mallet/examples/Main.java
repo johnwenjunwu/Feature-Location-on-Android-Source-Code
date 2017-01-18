@@ -1,5 +1,8 @@
 package cc.mallet.examples;
 
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
@@ -13,23 +16,20 @@ import java.util.concurrent.TimeUnit;
 
 public class Main {
     static String base = "/Users/wuwenjun/Documents/study/features/";
-    String question = "Change message body font size with slider";
+    String question = "activity.setup.AccountSetupIncoming.java";
     String source = "data/" + question;
-    static String[] test = {
-            "SSL file based session cache",
-            "use client certificate authentication",
-            "get Open Key chain",
-    };
 
-    public Main() throws IOException, InterruptedException {
+    public Main() throws IOException, InterruptedException, ParserConfigurationException, SAXException {
 //        createDirectory();
 //
-//        new JsonReadWrite(base + "/f9", source);
+//        new JsonReadWrite(base + "/view password by clicking on checkbox Show password", source);
 
         //int[] b = (int[]) new ObjectInputStream(new FileInputStream("kl/" + name)).readObject();
-        GenerateModel();
+//        GenerateModel();
+        DependencyModel();
         runTest();
-        new ResultRanking(source);
+        Dependency.generateDependencyFeature(source);
+//        new ResultRanking(source);
     }
 
     void createDirectory() throws IOException {
@@ -69,6 +69,27 @@ public class Main {
                 for (int mini = 1; mini <= 1; mini *= 2) {
                     int a = topic, b = train, c = mini;
                     executor.execute(new MyTopicModel(source, a, b, c));
+                    break tag;
+                }
+            }
+        }
+
+        executor.shutdown();
+        executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+    }
+
+    private void DependencyModel() throws InterruptedException, IOException {
+        deleteAllFiles(source + "/model");
+
+        ExecutorService executor = Executors.newFixedThreadPool(8);
+
+        tag:
+        for (int topic = 10; topic <= 100; topic *= 2) {
+            for (int train = 400; train <= 4000; train *= 2) {
+                for (int mini = 1; mini <= 1; mini *= 2) {
+                    int a = topic, b = train, c = mini;
+                    executor.execute(new DependencyTopic(source, a, b, c));
+                    break tag;
                 }
             }
         }
@@ -88,7 +109,8 @@ public class Main {
                     for (int iter = train; iter <= train; iter *= 2) {
                         int a = topic, b = train, c = mini, i = iter;
                         executor.execute(new Test(source, a + "_" + b + "_" + c,
-                                "view password by clicking on checkbox Show password", i));
+                                question, i));
+                        break tag;
                     }
                 }
             }
