@@ -16,101 +16,77 @@ import java.util.concurrent.TimeUnit;
 
 public class Main {
     static String base = "/Users/wuwenjun/Documents/study/features/";
-    String question = "activity.setup.AccountSetupIncoming.java";
-    String source = "data/" + question;
+    static HashMap<String, String> question = new HashMap<>();
 
-    public Main() throws IOException, InterruptedException, ParserConfigurationException, SAXException {
-//        createDirectory();
-//
-//        new JsonReadWrite(base + "/view password by clicking on checkbox Show password", source);
+    static String name = "f11";
+    static String root = "data/" + name;
 
-        //int[] b = (int[]) new ObjectInputStream(new FileInputStream("kl/" + name)).readObject();
-//        GenerateModel();
-        DependencyModel();
-        runTest();
-        Dependency.generateDependencyFeature(source);
-//        new ResultRanking(source);
-    }
+    static HashMap<String, String[]> ans = new HashMap<>();
+    static {
+        question.put("f2", "Client Certificate Authentication");
+        question.put("f5", "Change message body font size with slider");
+        question.put("f10", "Use json for serializing pending commands");
+        question.put("f11", "Test and fix database upgrade process");
+        question.put("f12", "Add unit tests for ImapConnection");
 
-    void createDirectory() throws IOException {
-//        Files.createDirectory(Paths.get(Main.source.split("/", 2)[0]));
-        Files.createDirectory(Paths.get(source));
-        Files.createDirectory(Paths.get(source + "/feature"));
-        Files.createDirectory(Paths.get(source + "/instance"));
-        Files.createDirectory(Paths.get(source + "/model"));
-        Files.createDirectory(Paths.get(source + "/model/gson"));
-        Files.createDirectory(Paths.get(source + "/model/model"));
-        Files.createDirectory(Paths.get(source + "/test"));
-        Files.createDirectory(Paths.get(source + "/test/cos"));
-        Files.createDirectory(Paths.get(source + "/test/kl"));
-    }
-    static void deleteAllFiles(String p) throws IOException {
-        Files.walk(Paths.get(p), FileVisitOption.FOLLOW_LINKS)
-                .map(Path::toFile)
-                .filter(File::isFile)
-                .peek(System.out::println)
-                .forEach(File::delete);
+        String[] s2 = {"ClientCertificateSpinner.java",
+                "KeyChainKeyManager.java",
+                "SslHelper.java",
+                "ClientCertificateRequiredException.java"
+        };
+        String[] s5 = {"FontSizeSettings.java",
+                "FontSizes.java",
+                "SliderPreference.java"};
+        String[] s10 = {
+                "MessagingControllerCommands.java",
+        "PendingCommandSerializer.java",
+        "MigrationTo60.java",
+        };
+
+        String[] s11 = {
+                "MigrationTo59.java",
+                "StoreSchemaDefinitionTest.java"
+        };
+        String[] s12 = {
+                "ImapConnection.java",
+                "ImapConnectionTest.java",
+                "SimpleImapSettings.java",
+                "MockImapServer.java",
+        };
+        ans.put("f2", s2);
+        ans.put("f5", s5);
+        ans.put("f10", s10);
+        ans.put("f11", s11);
     }
 
     public static void main(String[] args) throws Exception {
-        // System.out.println(new Stemmer().stem("yes"));
-
-        new Main();
+//        Ulti.deleteAllFiles(root);
+//        new Arrf(root, name);
+//        new JsonReadWrite(base + name, root + "/file");
+//        Dependency.generateDependencyFeature(root + "/dependency", base + name + "/a.xml");
+        lda();
+//        dependency();
     }
 
-    private void GenerateModel() throws InterruptedException, IOException {
-        deleteAllFiles(source + "/model");
-
+    public static void lda() throws Exception {
         ExecutorService executor = Executors.newFixedThreadPool(8);
 
         tag:
-        for (int topic = 10; topic <= 100; topic *= 2) {
-            for (int train = 400; train <= 4000; train *= 2) {
-                for (int mini = 1; mini <= 1; mini *= 2) {
-                    int a = topic, b = train, c = mini;
-                    executor.execute(new MyTopicModel(source, a, b, c));
-                    break tag;
-                }
-            }
-        }
+        for (String f: JsonReadWrite.types) {
+            for (int topic = 40; topic <= 80; topic *= 2) {
+                for (int train = 4000; train <= 4000; train *= 2) {
+                    for (int mini = 8; mini <= 8; mini *= 2) {
+                        for (int iter = train; iter <= train; iter *= 2) {
+                            int tp = topic, tr = train, m = mini, i = iter;
+                            executor.execute(() -> {
+                                String fileRoot = root + "/file/" + f;
+                                new FileTopic(fileRoot, tp, tr, m).run();
+                                new Test(fileRoot, tp + "_" + tr + "_" + m,
+                                        question.get(name), i).run();
+                                new ResultRanking(fileRoot, ans.get(name));
+                            });
+                        }
 
-        executor.shutdown();
-        executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-    }
-
-    private void DependencyModel() throws InterruptedException, IOException {
-        deleteAllFiles(source + "/model");
-
-        ExecutorService executor = Executors.newFixedThreadPool(8);
-
-        tag:
-        for (int topic = 10; topic <= 100; topic *= 2) {
-            for (int train = 400; train <= 4000; train *= 2) {
-                for (int mini = 1; mini <= 1; mini *= 2) {
-                    int a = topic, b = train, c = mini;
-                    executor.execute(new DependencyTopic(source, a, b, c));
-                    break tag;
-                }
-            }
-        }
-
-        executor.shutdown();
-        executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-    }
-
-    private void runTest() throws InterruptedException, IOException {
-        deleteAllFiles(source + "/test");
-        ExecutorService executor = Executors.newFixedThreadPool(8);
-
-        tag:
-        for (int topic = 10; topic <= 100; topic *= 2) {
-            for (int train = 400; train <= 4000; train *= 2) {
-                for (int mini = 1; mini <= 1; mini *= 2) {
-                    for (int iter = train; iter <= train; iter *= 2) {
-                        int a = topic, b = train, c = mini, i = iter;
-                        executor.execute(new Test(source, a + "_" + b + "_" + c,
-                                question, i));
-                        break tag;
                     }
                 }
             }
@@ -120,6 +96,45 @@ public class Main {
         executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
     }
 
+    public static void dependency() throws Exception {
+        ExecutorService executor = Executors.newFixedThreadPool(8);
+
+        tag:
+        for (int dTopic = 20; dTopic <= 60; dTopic *= 1.2) {
+            for (int dTrain = 1000; dTrain <= 4000; dTrain *= 2) {
+                for (int dMini = 1; dMini <= 1; dMini *= 2) {
+                    for (int diter = dTrain; diter <= dTrain; diter *= 2) {
+                        for (int top = 2; top <= 4; top ++) {
+
+                            int dtp = dTopic, dtr = dTrain, dm = dMini,
+                                    di = diter, dtop = top;
+                            executor.execute(()->{
+                                String dRoot = root + "/dependency";
+                                new DependencyTopic(dRoot, dtp, dtr, dm).run();
+                                new TestDependency(dRoot, dtp + "_" + dtr + "_" + dm,
+                                        root + "/file/R/test/cos/40_4000_8_4000.json"
+                                        , di, dtop).run();
+                                new ResultRanking(dRoot, ans.get(name));
+                            });
+//                            break tag;
+                        }
+                    }
+                }
+            }
+        }
+        executor.shutdown();
+        executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+    }
+//    private void GenerateModel() throws InterruptedException, IOException {
+//        deleteAllFiles(dir + "/model");
+//
+//        ExecutorService executor = Executors.newFixedThreadPool(8);
+//
+
+//
+//        executor.shutdown();
+//        executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+//    }
 
 
 }

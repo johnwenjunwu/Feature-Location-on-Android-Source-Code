@@ -100,7 +100,7 @@ public class MyTopicModel implements Runnable{
         ArrayList<TreeSet<IDSorter>> topicSortedWords = model.getSortedWords();
 
         StringBuilder builder = new StringBuilder();
-        // Show top 5 words in topics with proportions for the first document
+        // Show mini 5 words in topics with proportions for the first document
         for (int topic = 0; topic < model.getNumTopics(); topic++) {
             Iterator<IDSorter> iterator = topicSortedWords.get(topic).iterator();
 

@@ -15,12 +15,12 @@ import java.util.Iterator;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
-public class DependencyTopic implements Runnable{
+public class FileTopic implements Runnable{
 
     int numIterations;
     int numTopics;
     int mini;
-    String name, source;
+    String name, dir;
     InstanceList instances;
     ParallelTopicModel model;
     //Integer[][] sim;
@@ -28,11 +28,11 @@ public class DependencyTopic implements Runnable{
 
     public void generateInstances() {
         ArrayList<Pipe> pipeList = new ArrayList<Pipe>(Arrays.asList(
-//                new CharSequenceLowercase(),
-//                new StemPipe(),
+                new CharSequenceLowercase(),
+                new StemPipe(),
                 new CharSequence2TokenSequence(Pattern.compile("\\S+")),
 //                new TokenSequenceRemoveStopwords(new File("stoplists/activity.txt"), "UTF-8", false, false, false),
-//                new TokenSequenceRemoveStopwords(new File("stoplists/en.txt"), "UTF-8", false, false, false),
+                new TokenSequenceRemoveStopwords(new File("stoplists/en.txt"), "UTF-8", false, false, false),
                 new TokenSequence2FeatureSequence()));
 
         // Pipes: lowercase, tokenize, remove stopwords, map to features
@@ -40,19 +40,19 @@ public class DependencyTopic implements Runnable{
 
         Reader fileReader = null;
         try {
-            fileReader = new InputStreamReader(new FileInputStream(new File(source + "/feature/origin")), "UTF-8");
+            fileReader = new InputStreamReader(new FileInputStream(new File(dir + "/feature/wordsMoreThan" + mini)), "UTF-8");
         } catch (UnsupportedEncodingException | FileNotFoundException e) {
             e.printStackTrace();
         }
         instances.addThruPipe(new CsvIterator(fileReader, Pattern.compile("^(\\S*)[\\s,]*(\\S*)[\\s,]*(.*)$"),
                 3, 1, 2)); // data, label, name fields
-        new File(source + "/instance/").mkdirs();
-        instances.save(new File(source + "/instance/" + name));
+        new File(dir + "/instance").mkdirs();
+        instances.save(new File(dir + "/instance/" + name));
         //sim = new Integer[instances.size()][];
     }
 
-    DependencyTopic(String src, int topics, int train, int mini) {
-        source = src;
+    FileTopic(String src, int topics, int train, int mini) {
+        dir = src;
         name = topics + "_" + train + "_" + mini;
         numTopics = topics;
         numIterations = train;
@@ -68,8 +68,8 @@ public class DependencyTopic implements Runnable{
         //  Note that the first parameter is passed as the sum over topics, while
         //  the second is the parameter for a single dimension of the Dirichlet prior.
         model = new ParallelTopicModel(numTopics, 50, 0.01);
-        new File(source + "/model/model").mkdirs();
-        model.setSaveSerializedModel(numIterations, source + "/model/model/" + name);
+        new File(dir + "/model/model").mkdirs();
+        model.setSaveSerializedModel(numIterations, dir + "/model/model/" + name);
         model.addInstances(instances);
         // Use two parallel samplers, which each look at one half the corpus and combine
         //  statistics after every iteration.
@@ -110,8 +110,8 @@ public class DependencyTopic implements Runnable{
             builder.append('\n');
         }
         try {
-            new File(source + "/model/gson/").mkdirs();
-            Files.write(Paths.get(source + "/model/gson/" + name), builder.toString().getBytes());
+            new File(dir + "/model/gson/").mkdirs();
+            Files.write(Paths.get(dir + "/model/gson/" + name), builder.toString().getBytes());
         } catch (IOException e) {
             e.printStackTrace();
         }

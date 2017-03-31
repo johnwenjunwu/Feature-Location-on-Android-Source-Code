@@ -39,65 +39,57 @@ class MDirectory {
         }
     }
 
-    StringBuilder getMethodFeature() {
+//    StringBuilder getMethodFeature() {
+//        StringBuilder stringBuilder = new StringBuilder();
+//        for (MDirectory directory : subDirectories)
+//            stringBuilder.append(directory.getMethodFeature());
+//        for (MFile file : files)
+//            for (MClass mClass : file.classes)
+//                for (MMethod mMethod : mClass.methods)
+//                    stringBuilder.append(mMethod.methodFeature());
+//
+//        return stringBuilder;
+//    }
+
+//    StringBuilder getMethodAndClassFeature() {
+//        StringBuilder stringBuilder = new StringBuilder();
+//        for (MDirectory directory : subDirectories)
+//            stringBuilder.append(directory.getMethodAndClassFeature());
+//        for (MFile file : files)
+//            for (MClass mClass : file.classes) {
+//                stringBuilder.append(mClass.classFeature());
+//                for (MMethod mMethod : mClass.methods)
+//                    stringBuilder.append(mMethod.methodFeature());
+//            }
+//        return stringBuilder;
+//    }
+//    StringBuilder getClassFeature() {
+//        StringBuilder stringBuilder = new StringBuilder();
+//        for (MDirectory directory : subDirectories)
+//            stringBuilder.append(directory.getClassFeature());
+//        for (MFile file : files)
+//            for (MClass mClass : file.classes)
+//                stringBuilder.append(mClass.classFeature());
+//
+//        return stringBuilder;
+//    }
+
+    StringBuilder getFileFeature(boolean not, boolean R) {
         StringBuilder stringBuilder = new StringBuilder();
         for (MDirectory directory : subDirectories)
-            stringBuilder.append(directory.getMethodFeature());
+            stringBuilder.append(directory.getFileFeature(not, R));
         for (MFile file : files)
-            for (MClass mClass : file.classes)
-                for (MMethod mMethod : mClass.methods)
-                    stringBuilder.append(mMethod.methodFeature());
+            stringBuilder.append(file.fileFeature(not, R));
 
         return stringBuilder;
     }
 
-    StringBuilder getMethodAndClassFeature() {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (MDirectory directory : subDirectories)
-            stringBuilder.append(directory.getMethodAndClassFeature());
-        for (MFile file : files)
-            for (MClass mClass : file.classes) {
-                stringBuilder.append(mClass.classFeature());
-                for (MMethod mMethod : mClass.methods)
-                    stringBuilder.append(mMethod.methodFeature());
-            }
-        return stringBuilder;
-    }
-    StringBuilder getClassFeature() {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (MDirectory directory : subDirectories)
-            stringBuilder.append(directory.getClassFeature());
-        for (MFile file : files)
-            for (MClass mClass : file.classes)
-                stringBuilder.append(mClass.classFeature());
-
-        return stringBuilder;
-    }
-    StringBuilder getActivityFeature(Vector<MActivity> activities) {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (MDirectory directory : subDirectories)
-            stringBuilder.append(directory.getActivityFeature(activities));
-        for (MFile file : files)
-            if(file.packageName.contains(".activity")) {
-                String prefix = file.packageName.split("\\.activity", 2)[1];
-                for (MClass mClass : file.classes) {
-                    for (MActivity activity : activities) {
-                        if (activity.name.equals(prefix + "." + mClass.className)) {
-//                            System.out.println(activity.name + " " + prefix + "." + mClass.className);
-                            stringBuilder.append(mClass.classFeature());
-                            break;
-                        }
-                    }
-                }
-            }
-
-        return stringBuilder;
-    }
 }
 
 class MFile {
     String packageName;
     String fileName;
+    String name;
     Vector<MClass> classes;
 
     MFile(File file) {
@@ -107,22 +99,49 @@ class MFile {
             CompilationUnit compilationUnit = JavaParser.parse(file);
             packageName = compilationUnit.getPackageDeclaration().get().getName().toString();
             compilationUnit.getNodesByType(ClassOrInterfaceDeclaration.class).forEach(c -> classes.add(new MClass(c, this)));
+            name = (packageName + "." + fileName).replace("com.fsck.k9.", "");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
     }
+
+    String fileFeature(boolean not, boolean R) {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        stringBuilder.append(name).append(' ').append(name.replace(".java", "").replaceAll(divide, " "));
+
+        classes.forEach(c -> {
+            c.fields.forEach(f -> stringBuilder.append(" ").append(f.replaceAll(divide, " ")));
+            if (not)
+                c.notFields.forEach(f -> stringBuilder.append(" ").append(f.replaceAll(divide, " ")));
+
+            c.methods.forEach(m -> {
+                stringBuilder.append(' ').append(m.methodName.replaceAll(divide, " "));
+                m.varibles.forEach(id -> stringBuilder.append(' ').append(id.replaceAll(divide, " ")));
+                if (R)
+                    m.ids.forEach(id -> stringBuilder.append(' ').append(id.replaceAll(divide, " ")));
+            });
+        });
+
+        String s = stringBuilder.toString().replaceAll("\\s+", " ");
+        int sum = s.split(" ").length - 1;
+        return sum + " " + s + '\n';
+    }
+
 }
 
 class MClass {
     String className;
     Vector<MMethod> methods;
     Vector<String> fields;
+    Vector<String> notFields;
     MFile file;
-    Vector<String> ids;
+//    Vector<String> ids;
 
     MClass(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, MFile file) {
         this.file = file;
         fields = new Vector<>();
+        notFields = new Vector<>();
         className = classOrInterfaceDeclaration.getName().getIdentifier();
         classOrInterfaceDeclaration.getFields().forEach(f -> {
             boolean feature = true;
@@ -136,30 +155,13 @@ class MClass {
                 f.getVariables().forEach(v -> {
                     fields.add(v.getName().getIdentifier());
                 });
-            }
+            } else
+                f.getVariables().forEach(v -> notFields.add(v.getName().getIdentifier()));
         });
         methods = new Vector<>();
         classOrInterfaceDeclaration.getMethods().forEach(m -> {
             methods.add(new MMethod(m, file, this));
         });
-    }
-
-    String classFeature() {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(file.packageName + "_" + file.fileName + " " + className);
-        stringBuilder.append(" " + file.packageName.substring("com.fsck.k9".length()).replaceAll(divide, " "));
-        stringBuilder.append(" " + file.fileName.split("\\.", 2)[0].replaceAll(divide, " "));
-
-        fields.forEach(f -> stringBuilder.append(" " + f.replaceAll(divide, " ")));
-
-        for (MMethod mMethod : methods) {
-            stringBuilder.append(' ');
-            stringBuilder.append(mMethod.methodName.replaceAll(divide, " "));
-            mMethod.varibles.forEach(id -> stringBuilder.append(' ' + id.replaceAll(divide, " ")));
-            mMethod.ids.forEach(id -> stringBuilder.append(' ' + id.replaceAll(divide, " ")));
-        }
-        stringBuilder.append('\n');
-        return stringBuilder.toString();
     }
 }
 
@@ -195,65 +197,58 @@ class MMethod {
                 ids.add(matcher.group(1));
         }
     }
-
-    StringBuilder methodFeature() {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(file.packageName + "_" + file.fileName + "_" + mClass.className + " "
-                + methodName);
-
-        stringBuilder.append(" " + methodName.replaceAll(divide, " "));
-        varibles.forEach(var -> stringBuilder.append(' ' + var.replaceAll(divide, " ")));
-        usedFilds.forEach(f -> stringBuilder.append(' ' + f.replaceAll(divide, " ")));
-        ids.forEach(id -> stringBuilder.append(' ' + id.replaceAll(divide, " ")));
-
-        stringBuilder.append('\n');
-        return stringBuilder;
-    }
 }
 
 public class JsonReadWrite {
 
+    public static String[] types = {"basic", "R"};
     String project, source;
     JsonReadWrite(String project, String source) throws IOException {
         this.project = Files.list(Paths.get(project)).filter(p -> p.getFileName().toString().startsWith("k-9-"))
                 .findFirst().get().toString();
         this.source = source;
-        generateActivityFeature();
+//        generateActivityFeature();
+        GenerateFileClassFeature();
     }
     public static void main(String[] args) throws IOException {
-//        GenerateOriginClassFeature();
-//
-//        for (int mini = 0; mini <= 100; ++mini) {
-//            StringBuilder builder = new StringBuilder();
-//            for (String line : Files.readAllLines(Paths.get(Main.source + "/feature/origin"))) {
-//                int length = line.split(" +").length - 2;
-//                if (length > mini)
-//                    builder.append(line).append('\n');
-//            }
-//            Files.write(Paths.get(Main.source + "/feature/wordsMoreThan" + mini), builder.toString().getBytes());
-//        }
-//        generateActivityFeature();
+
     }
 
-    private void generateActivityFeature() throws IOException {
-        MDirectory dir = new MDirectory(new File(project + "/src/com/fsck/k9"));
+
+    void notR(boolean not, boolean R, String src) throws IOException {
+        File f = new File(project + "/src/com/fsck/k9");
+        File test = null;
+        if(!f.exists()) {
+            f = new File(project + "/k9mail/src/main/java/com/fsck/k9");
+            test = new File(project + "/k9mail/src/test/java/com/fsck/k9");
+        }
+        MDirectory dir = new MDirectory(f);
         //System.out.println(dir.getMethodFeature().toString().split("\n").length);
-        try (FileWriter writer = new FileWriter(source + "/feature/activity")) {
-            writer.write(dir.getActivityFeature(MActivity.getActivities(project + "/AndroidManifest.xml")).toString());
+        new File(src).mkdirs();
+        try (FileWriter writer = new FileWriter(src + "/origin")) {
+            writer.write(dir.getFileFeature(not, R).toString());
+            if(test != null)
+                writer.write(new MDirectory(test).getFileFeature(not, R).toString());
             //gson.toJson(dir, writer);
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
 
-    private void GenerateOriginClassFeature() throws IOException {
-        MDirectory dir = new MDirectory(new File(project + "/src/com/fsck/k9"));
-        //System.out.println(dir.getMethodFeature().toString().split("\n").length);
-        try (FileWriter writer = new FileWriter(source + "/feature/origin")) {
-            writer.write(dir.getMethodAndClassFeature().toString());
-            //gson.toJson(dir, writer);
-        } catch (IOException e) {
-            e.printStackTrace();
+        for (int mini = 0; mini <= 20; ++mini) {
+            StringBuilder builder = new StringBuilder();
+            for (String line : Files.readAllLines(Paths.get(src + "/origin"))) {
+                if (Integer.parseInt(line.split(" ", 2)[0]) >= mini)
+                    builder.append(line).append('\n');
+            }
+            Files.write(Paths.get(src + "/wordsMoreThan" + mini), builder.toString().getBytes());
         }
+    }
+    private void GenerateFileClassFeature() throws IOException {
+        notR(true, false, source + "/basic/feature");
+//        notR(false, false, source + "/not/feature");
+        notR(true, true, source + "/R/feature");
+//        notR(false, true, source + "/notR/feature");
+
+
     }
 }

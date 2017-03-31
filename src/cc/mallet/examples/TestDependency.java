@@ -2,7 +2,8 @@ package cc.mallet.examples;
 
 import cc.mallet.topics.ParallelTopicModel;
 import cc.mallet.topics.TopicInferencer;
-import cc.mallet.types.*;
+import cc.mallet.types.Instance;
+import cc.mallet.types.InstanceList;
 import cc.mallet.util.Maths;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -13,10 +14,11 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.text.DecimalFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
-public class Test implements Runnable{
+public class TestDependency implements Runnable {
     ParallelTopicModel model;
     Instance testInstance;
     InstanceList instances;
@@ -24,54 +26,42 @@ public class Test implements Runnable{
     int iter, top;
     List<Instance> features;
 
-    Test(String src, String name, String test, int iter) {
-        this.iter = iter;
-        source = src;
-        this.name = name;
+    TestDependency(String src, String name, String test, int iter, int top) {
         try {
-            new File(source + "/model/model/").mkdirs();
-            model = ParallelTopicModel.read(new File(source + "/model/model/" + name + "." + name.split("_")[1]));
-        } catch (Exception e) {
+            this.iter = iter;
+            source = src;
+            this.name = name;
+            this.top = top;
+            try {
+                new File(source + "/model/model").mkdirs();
+                model = ParallelTopicModel.read(new File(source + "/model/model/" + name + "." + name.split("_")[1]));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            instances = InstanceList.load(new File(source + "/instance/" + name));
+            InstanceList testing = new InstanceList(instances.getPipe());
+
+            Vector<Test.Item> v = new Gson().fromJson(new String(Files.readAllBytes(Paths.get(test))),
+                    new TypeToken<Vector<Test.Item>>() {
+                    }.getType());
+
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < top; ++i)
+                builder.append(v.get(i).name).append(" ");
+
+            testing.addThruPipe(new Instance(builder.toString(), null, "test instance", null));
+            testInstance = testing.get(0);
+            //features = Files.readAllLines(Paths.get("feature/wordsMoreThan" + name.split("_")[2]));
+            features = new ArrayList<>();
+            model.getData().forEach(d -> {
+                features.add(d.instance);
+            });
+            //System.out.println(model.alphabet);
+        } catch (IOException e) {
             e.printStackTrace();
         }
-        instances = InstanceList.load(new File(source + "/instance/" + name));
-        InstanceList testing = new InstanceList(instances.getPipe());
-        testing.addThruPipe(new Instance(test, null, "test instance", null));
-        testInstance = testing.get(0);
-        //features = Files.readAllLines(Paths.get("feature/wordsMoreThan" + name.split("_")[2]));
-        features = new ArrayList<>();
-        model.getData().forEach(d -> {
-            features.add(d.instance);
-        });
-        //System.out.println(model.alphabet);
     }
 
-    Test(String src, String name, String file, int iter, int top) throws IOException {
-        this.iter = iter;
-        source = src;
-        this.name = name;
-        try {
-            model = ParallelTopicModel.read(new File(source + "/model/model/" + name + "." + name.split("_")[1]));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        instances = InstanceList.load(new File(source + "/instance/" + name));
-        InstanceList testing = new InstanceList(instances.getPipe());
-
-        Vector<Test.Item> v = new Gson().fromJson(new String(Files.readAllBytes(Paths.get(file))),
-                new TypeToken<Vector<Item>>(){}.getType());
-        for (int i = 0; i < top; ++i)
-            System.out.println(v.get(i).name);
-
-//        testing.addThruPipe(new Instance(test, null, "test instance", null));
-//        testInstance = testing.get(0);
-//        //features = Files.readAllLines(Paths.get("feature/wordsMoreThan" + name.split("_")[2]));
-//        features = new ArrayList<>();
-//        model.getData().forEach(d -> {
-//            features.add(d.instance);
-//        });
-        //System.out.println(model.alphabet);
-    }
 
     public void questionResult() {
         TopicInferencer inferencer = model.getInferencer();
@@ -84,6 +74,7 @@ public class Test implements Runnable{
         }
         System.out.println("\n\n" + name + '\n' + question);
     }
+
     @Override
     public void run() {
         Vector<Item> cosList = new Vector<>(), klList = new Vector<>();
@@ -114,15 +105,15 @@ public class Test implements Runnable{
                         Result.cosine(model.getTopicProbabilities(i), request), model.getTopicProbabilities(i)));
                 klList.add(new Item(i, Maths.klDivergence(model.getTopicProbabilities(i), request), model.getTopicProbabilities(i)));
             }
-            cosList.sort((a,b)->a.sim>b.sim?-1:1);
-            for (Item item: cosList)
+            cosList.sort((a, b) -> a.sim > b.sim ? -1 : 1);
+            for (Item item : cosList)
                 item.No = cosList.indexOf(item);
 
-            klList.sort((a,b)->a.sim<b.sim?-1:1);
+            klList.sort((a, b) -> a.sim < b.sim ? -1 : 1);
 
             //System.out.println(cosList.get(0).pos);
-            new File(source + "/test/cos").mkdirs();
-            Files.write(Paths.get(source + "/test/cos/" + name + "_" + iter + ".json"), new Gson().toJson(cosList).getBytes());
+            new File(source + "/test/cos/").mkdirs();
+            Files.write(Paths.get(source + "/test/cos/" + name + "_" + iter + "_" + top + ".json"), new Gson().toJson(cosList).getBytes());
             //Files.write(Paths.get(dir + "/test/kl/" + name + ".json"), new Gson().toJson(klList).getBytes());
 
         } catch (IOException e) {
@@ -130,6 +121,7 @@ public class Test implements Runnable{
         }
 
     }
+
     class Item {
         String target, name;
         int No;
@@ -137,6 +129,7 @@ public class Test implements Runnable{
         //int pos;
         double sim;
         Vector<String> topics;
+
         Item(int i, double sim, double[] topic) {
             topics = new Vector<>();
             for (int t = 0; t < topic.length; ++t) {
@@ -151,7 +144,6 @@ public class Test implements Runnable{
             //  this.topic = topic;
         }
     }
-
 
 
 }

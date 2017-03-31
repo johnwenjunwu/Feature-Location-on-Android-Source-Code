@@ -27,21 +27,24 @@ public class Dependency {
 
     @Override
     public String toString() {
+        String ret = (calls.size() + usages.size()) + " " + name + " " + name;
         if (calls.size() > 0)
-            return calls.size() + " " + name + " " + name + " " + String.join(" ", calls) + "\n";
-        else
-            return calls.size() + " " + name + " " + name + String.join(" ", calls) + "\n";
+            ret += " " + String.join(" ", calls);
+        if (usages.size() > 0)
+            ret += " " + String.join(" ", usages);
+        return ret + "\n";
     }
 
     static String prefix = "$PROJECT_DIR$/src/com/fsck/k9/";
 
-    public static void generateDependencyFeature(String source) throws ParserConfigurationException, IOException, SAXException {
-        String s = "/Users/wuwenjun/Downloads/a.xml";
+    public static void generateDependencyFeature(String source, String xml) throws ParserConfigurationException, IOException, SAXException {
 
+        System.out.println(xml);
         StringBuilder builder = new StringBuilder();
-        Map<String, Dependency> map = getDependencies(s);
+        Map<String, Dependency> map = getDependencies(xml);
         map.forEach((k, v)->builder.append(v));
-        Files.write(Paths.get(source + "/feature/dependency"), builder.toString().getBytes());
+        new File(source + "/feature").mkdirs();
+        Files.write(Paths.get(source + "/feature/origin"), builder.toString().getBytes());
     }
 
 
@@ -74,7 +77,7 @@ public class Dependency {
             }
         }
         map.forEach((k, d) -> {
-            d.calls.forEach(c -> map.get(c).usages.add(c));
+            d.calls.forEach(c -> map.get(c).usages.add(d.name));
         });
         return map;
     }

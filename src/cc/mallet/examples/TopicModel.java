@@ -68,7 +68,7 @@ public class TopicModel {
 		// Get an array of sorted sets of word ID/count pairs
 		ArrayList<TreeSet<IDSorter>> topicSortedWords = model.getSortedWords();
 		
-		// Show top 5 words in topics with proportions for the first document
+		// Show mini 5 words in topics with proportions for the first document
 		for (int topic = 0; topic < numTopics; topic++) {
 			Iterator<IDSorter> iterator = topicSortedWords.get(topic).iterator();
 			
@@ -94,7 +94,7 @@ public class TopicModel {
 			rank++;
 		}
 
-		// Create a new instance named "test instance" with empty target and source fields.
+		// Create a new instance named "test instance" with empty target and dir fields.
 		InstanceList testing = new InstanceList(instances.getPipe());
 		testing.addThruPipe(new Instance(topicZeroText.toString(), null, "test instance", null));
 
