@@ -99,7 +99,7 @@ class MFile {
             CompilationUnit compilationUnit = JavaParser.parse(file);
             packageName = compilationUnit.getPackageDeclaration().get().getName().toString();
             compilationUnit.getNodesByType(ClassOrInterfaceDeclaration.class).forEach(c -> classes.add(new MClass(c, this)));
-            name = (packageName + "." + fileName).replace("com.fsck.k9.", "");
+            name = (packageName + "." + fileName).replace("com.owncloud.android.", "");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -203,22 +203,24 @@ public class JsonReadWrite {
 
     public static String[] types = {"basic", "R"};
     String project, source;
+
     JsonReadWrite(String project, String source) throws IOException {
-        this.project = Files.list(Paths.get(project)).filter(p -> p.getFileName().toString().startsWith("k-9-"))
+        this.project = Files.list(Paths.get(project)).filter(p -> p.getFileName().toString().startsWith("android-"))
                 .findFirst().get().toString();
         this.source = source;
 //        generateActivityFeature();
         GenerateFileClassFeature();
     }
+
     public static void main(String[] args) throws IOException {
 
     }
 
 
     void notR(boolean not, boolean R, String src) throws IOException {
-        File f = new File(project + "/src/com/fsck/k9");
+        File f = new File(project + "/src/com/owncloud/android");
         File test = null;
-        if(!f.exists()) {
+        if (!f.exists()) {
             f = new File(project + "/k9mail/src/main/java/com/fsck/k9");
             test = new File(project + "/k9mail/src/test/java/com/fsck/k9");
         }
@@ -227,7 +229,7 @@ public class JsonReadWrite {
         new File(src).mkdirs();
         try (FileWriter writer = new FileWriter(src + "/origin")) {
             writer.write(dir.getFileFeature(not, R).toString());
-            if(test != null)
+            if (test != null)
                 writer.write(new MDirectory(test).getFileFeature(not, R).toString());
             //gson.toJson(dir, writer);
         } catch (IOException e) {
@@ -243,6 +245,7 @@ public class JsonReadWrite {
             Files.write(Paths.get(src + "/wordsMoreThan" + mini), builder.toString().getBytes());
         }
     }
+
     private void GenerateFileClassFeature() throws IOException {
         notR(true, false, source + "/basic/feature");
 //        notR(false, false, source + "/not/feature");

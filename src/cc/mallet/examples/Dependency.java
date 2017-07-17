@@ -35,7 +35,8 @@ public class Dependency {
         return ret + "\n";
     }
 
-    static String prefix = "$PROJECT_DIR$/src/com/fsck/k9/";
+    static String prefix = "$PROJECT_DIR$/src/com/owncloud/android/";
+    static String p2 = "$PROJECT_DIR$/k9mail/src/main/java/com/fsck/k9/";
 
     public static void generateDependencyFeature(String source, String xml) throws ParserConfigurationException, IOException, SAXException {
 
@@ -59,18 +60,26 @@ public class Dependency {
             if (list.item(i).getNodeType() == Node.ELEMENT_NODE) {
                 Element element = (Element)list.item(i);
                 String path = element.getAttribute("path");
-                if(!path.startsWith(prefix))
+
+                String name;
+                if(path.startsWith(prefix)) {
+                    name = path.replace(prefix, "").replace('/', '.');
+                    System.out.println(name);
+                }
+                else if(path.startsWith(p2))
+                    name = path.replace(p2, "").replace('/', '.');
+                else
                     continue;
-                String name = path.replace(prefix, "").replace('/', '.');
 
                 NodeList nodeList = element.getElementsByTagName("dependency");
                 Vector<String> calls = new Vector<>();
                 for (int j = 0; j < nodeList.getLength(); ++j) {
                     if (nodeList.item(j).getNodeType() == Node.ELEMENT_NODE) {
                         String file = ((Element)nodeList.item(j)).getAttribute("path");
-                        if (!file.startsWith(prefix))
-                            continue;
-                        calls.add(file.replace(prefix, "").replace('/', '.'));
+                        if (file.startsWith(prefix))
+                            calls.add(file.replace(prefix, "").replace('/', '.'));
+                        else if (file.startsWith(p2))
+                            calls.add(file.replace(p2, "").replace('/', '.'));
                     }
                 }
                 map.put(name, new Dependency(name, calls));

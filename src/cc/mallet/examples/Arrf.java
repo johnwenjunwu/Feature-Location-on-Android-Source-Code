@@ -13,8 +13,9 @@ public class Arrf {
                 + name + "/component_related-to_concern.arff")))
                 .split("@DATA\n",2)[1].split("\n");
         for (String line: contents) {
+//            System.out.println(line);
             String[] con = line.split("\"");
-            if (con.length > 3 && con[1].contains("com.fsck.k9")){// && con[2].equals(",method,")) {
+            if (con.length > 3 && con[1].contains("com.")){// && con[2].equals(",method,")) {
                 builder.append(con[1]).append('\n');
             }
         }
