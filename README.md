@@ -9,12 +9,11 @@ In my research, the scenario is that we have two inputs: the Android source code
 
 Our goal is to find near-complete implementations of features.
 
-Traditionally, there are three approaches to locate the source code: Textual, Static and Dynamic. The biggest challenge and difference to previous work is that the flow chart on Android Source Code is not complete compared to that of Java since it runs on the Android Operating System. Right now, we have adapted textual and static feature location techniques to Android Source Code, and have achieved higher accuracy by combining these two techniques according to the characteristics of Android.
-
+Traditionally, there are three approaches to locate the11 source code: Textual, Static and Dynamic. The biggest challenge and difference to previous work is that the flow chart on Android Source Code is not complete compared to that of Java since it runs on the Android Operating System. Right now, we have adapted textual and static feature location techniques to Android Source Code, and have achieved higher accuracy by combining these two techniques according to the characteristics of Android.
 
 
 ## Flowchart:
-![Flowchart](flowchart.png)
+![Flowchart](flow.png)
 
 ## Result:
 ![top](top.png)
