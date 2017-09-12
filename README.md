@@ -14,3 +14,4 @@ Traditionally, there are three approaches to locate the source code: Textual, St
 
 
 ## List of Algorithms:
+![Flowchart](flowchart.png)
