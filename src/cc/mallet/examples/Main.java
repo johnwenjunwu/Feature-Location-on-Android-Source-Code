@@ -18,7 +18,7 @@ public class Main {
     static String base = "/Users/wuwenjun/Documents/study/features/";
     static HashMap<String, String> question = new HashMap<>();
 
-    static String name = "f23";
+    static String name = "f24";
     static String root = "data/" + name;
 
     static HashMap<String, String[]> ans = new HashMap<>();
@@ -31,7 +31,7 @@ public class Main {
         question.put("f21", "Detect instant uploads with different observer implementations depending on device manufacturer");
         question.put("f22", "Retry transfers interrupted by connectivity loss");
         question.put("f23", "Multiple public shares");
-
+        question.put("f24", "Support hidden version in status.php taking version from capabilities API as prefered");
         String[] s2 = {"ClientCertificateSpinner.java",
                 "KeyChainKeyManager.java",
                 "SslHelper.java",
@@ -89,6 +89,14 @@ public class Main {
                 "FileOperationsHelper.java",
                 "DateUtils.java"
         };
+        String[] s24 = {
+                "AccountUtils.java",
+                "DetectAuthenticationMethodOperation.java",
+                "GetServerInfoOperation.java",
+                "RefreshFolderOperation.java",
+                "SyncCapabilitiesOperation.java",
+
+        };
         ans.put("f2", s2);
         ans.put("f5", s5);
         ans.put("f10", s10);
@@ -97,15 +105,16 @@ public class Main {
         ans.put("f21", s21);
         ans.put("f22", s22);
         ans.put("f23", s23);
+        ans.put("f24", s24);
     }
 
     public static void main(String[] args) throws Exception {
 //        Ulti.deleteAllFiles(root);
 //        new Arrf(root, name);
-        new JsonReadWrite(base + name, root + "/file");
+//        new JsonReadWrite(base + name, root + "/file");
 //        Dependency.generateDependencyFeature(root + "/dependency", base + name + "/a.xml");
         lda();
-//        dependency();
+        dependency();
     }
 
     public static void lda() throws Exception {
@@ -113,7 +122,7 @@ public class Main {
 
         tag:
         for (String f: JsonReadWrite.types) {
-            for (int topic = 40; topic <= 40; topic *= 2) {
+            for (int topic = 40; topic <= 40; topic *= 1.2) {
                 for (int train = 4000; train <= 4000; train *= 2) {
                     for (int mini = 4; mini <= 8; mini *= 2) {
                         for (int iter = train; iter <= train; iter *= 2) {
@@ -140,11 +149,11 @@ public class Main {
         ExecutorService executor = Executors.newFixedThreadPool(8);
 
         tag:
-        for (int dTopic = 20; dTopic <= 60; dTopic *= 1.2) {
+        for (int dTopic = 40; dTopic <= 40; dTopic *= 1.2) {
             for (int dTrain = 1000; dTrain <= 2000; dTrain *= 2) {
                 for (int dMini = 1; dMini <= 1; dMini *= 2) {
                     for (int diter = dTrain; diter <= dTrain; diter *= 2) {
-                        for (int top = 2; top <= 5; top ++) {
+                        for (int top = 2; top <= 4; top ++) {
 
                             int dtp = dTopic, dtr = dTrain, dm = dMini,
                                     di = diter, dtop = top;

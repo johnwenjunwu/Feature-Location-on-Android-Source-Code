@@ -1,35 +1,16 @@
-Mallet
+Feature Location on Android Source Code
 ======
 
-Website: http://mallet.cs.umass.edu/index.php
+Software maintenance and evolution tasks first require programmers to understand the implementation of specific parts of an existing software system. To do so requires locating the source code that implements functionality, that’s an activity called feature location.
 
-MALLET is a Java-based package for statistical natural language processing, document classification, clustering, topic modeling, information extraction, and other machine learning applications to text.
+In other words, a feature is a functional requirement of a program, such as spelling checking in a word processor or drawing a shape in a paint program. And the location is the activity of identifying the source code elements, such as methods or files, that implement the feature.
 
-MALLET includes sophisticated tools for document classification: efficient routines for converting text to "features", a wide variety of algorithms (including Naïve Bayes, Maximum Entropy, and Decision Trees), and code for evaluating classifier performance using several commonly used metrics.
+In my research, the scenario is that we have two inputs: the Android source code and a natural language-like query provided by commits in the Github. The output is a list of java files that implement the feature. The group truth is the records with significant change compared to the previous version, which is listed in the Commit file.
 
-In addition to classification, MALLET includes tools for sequence tagging for applications such as named-entity extraction from text. Algorithms include Hidden Markov Models, Maximum Entropy Markov Models, and Conditional Random Fields. These methods are implemented in an extensible system for finite state transducers.
+Our goal is to find near-complete implementations of features.
 
-Topic models are useful for analyzing large collections of unlabeled text. The MALLET topic modeling toolkit contains efficient, sampling-based implementations of Latent Dirichlet Allocation, Pachinko Allocation, and Hierarchical LDA.
+Traditionally, there are three approaches to locate the source code: Textual, Static and Dynamic. The biggest challenge and difference to previous work is that the flow chart on Android Source Code is not complete compared to that of Java since it runs on the Android Operating System. Right now, we have adapted textual and static feature location techniques to Android Source Code, and have achieved higher accuracy by combining these two techniques according to the characteristics of Android.
 
-Many of the algorithms in MALLET depend on numerical optimization. MALLET includes an efficient implementation of Limited Memory BFGS, among many other optimization methods.
-
-In addition to sophisticated Machine Learning applications, MALLET includes routines for transforming text documents into numerical representations that can then be processed efficiently. This process is implemented through a flexible system of "pipes", which handle distinct tasks such as tokenizing strings, removing stopwords, and converting sequences into count vectors.
-
-An add-on package to MALLET, called GRMM, contains support for inference in general graphical models, and training of CRFs with arbitrary graphical structure.
 
 
 ## List of Algorithms:
-
-* Topic Modelling
-  * LDA
-  * Parallel LDA
-  * DMR LDA
-  * Hierarchical LDA
-  * Labeled LDA
-  * Polylingual Topic Model
-  * Hierarchical Pachinko Allocation Model (PAM)
-  * Weighted Topic Model
-  * LDA with integrated phrase discovery
-  * Word Embeddings (word2vec) using skip-gram with negative sampling
-
-
