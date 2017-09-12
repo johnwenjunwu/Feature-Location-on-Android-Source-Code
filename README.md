@@ -17,4 +17,4 @@ Traditionally, there are three approaches to locate the source code: Textual, St
 ![Flowchart](flowchart.png)
 
 ## Result:
-![top](top.png)
+![top](results.png)
